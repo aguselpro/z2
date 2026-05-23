@@ -1,0 +1,1132 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Zoom Clone</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white min-h-screen flex items-center justify-center p-4">
+
+  <div id="joinScreen" class="bg-gray-800 w-full max-w-2xl rounded-3xl p-6 shadow-2xl">
+
+    <h1 class="text-5xl font-bold text-center mb-8">
+      Zoom Clone
+    </h1>
+
+    <div class="space-y-4">
+
+      <input id="usernameInput" type="text" placeholder="Tu nombre" class="w-full bg-gray-700 rounded-2xl p-4 outline-none text-white">
+
+      <input id="meetingIdInput" type="text" placeholder="ID de reunión" class="w-full bg-gray-700 rounded-2xl p-4 outline-none text-white">
+
+      <input id="meetingPasswordInput" type="password" placeholder="Contraseña" class="w-full bg-gray-700 rounded-2xl p-4 outline-none text-white">
+
+      <div class="flex gap-4">
+        
+        <button id="previewBtn" class="flex-1 bg-purple-500 hover:bg-purple-600 rounded-2xl p-4 font-bold text-xl">
+          Vista Previa
+        </button>
+        <button id="createMeetingBtn" class="flex-1 bg-blue-500 hover:bg-blue-600 rounded-2xl p-4 font-bold text-xl">
+          Crear Reunión
+        </button>
+
+        <button id="joinMeetingBtn" class="flex-1 bg-green-500 hover:bg-green-600 rounded-2xl p-4 font-bold text-xl">
+          Unirse
+        </button>
+      </div>
+
+    </div>
+
+  </div>
+
+  <div id="previewScreen" class="hidden bg-gray-800 w-full max-w-3xl rounded-3xl p-6 shadow-2xl mb-4">
+
+    <h2 class="text-3xl font-bold text-center mb-6">
+      Vista previa de reunión
+    </h2>
+
+    <div class="bg-black rounded-2xl overflow-hidden border border-gray-700 relative h-[300px] flex items-center justify-center">
+      <video id="previewVideo" autoplay playsinline muted class="w-full h-full object-cover"></video>
+    </div>
+
+    <div class="flex gap-4 mt-6">
+      <button id="joinNowBtn" class="flex-1 bg-green-500 hover:bg-green-600 rounded-2xl p-4 font-bold text-xl">
+        Entrar a la reunión
+      </button>
+
+      <button id="cancelPreviewBtn" class="flex-1 bg-red-500 hover:bg-red-600 rounded-2xl p-4 font-bold text-xl">
+        Cancelar
+      </button>
+    </div>
+
+  </div>
+
+  <div id="meetingScreen" class="hidden bg-gray-800 w-full max-w-6xl rounded-3xl p-6 shadow-2xl">
+
+    <h1 class="text-3xl font-bold text-center mb-6">
+      Zoom Clone
+    </h1>
+
+    <div class="bg-black rounded-2xl overflow-hidden border border-gray-700 relative h-[400px] flex items-center justify-center">
+      <span id="cameraText" class="absolute text-gray-400 text-xl">
+        Cámara apagada
+      </span>
+
+      <video
+        id="video"
+        autoplay
+        playsinline
+        muted
+        class="w-full h-full object-cover"
+      ></video>
+      <audio id="localAudio" autoplay hidden></audio>
+    </div>
+
+    <div id="remoteVideos" class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4"></div>
+
+    <div id="error" class="hidden bg-red-500/20 border border-red-500 text-red-300 p-3 rounded-xl mt-4 text-center"></div>
+
+    <div class="flex flex-wrap gap-3 justify-center mt-6">
+
+      <button id="fullscreenBtn" class="bg-cyan-500 hover:bg-cyan-600 px-5 py-3 rounded-2xl font-bold">
+        Pantalla Completa
+      </button>
+
+      <button id="participantsBtn" class="bg-indigo-500 hover:bg-indigo-600 px-5 py-3 rounded-2xl font-bold">
+        Participantes
+      </button>
+
+      <button id="chatBtn" class="bg-pink-500 hover:bg-pink-600 px-5 py-3 rounded-2xl font-bold">
+        Chat
+      </button>
+
+      <button id="testAudioBtn" class="bg-emerald-500 hover:bg-emerald-600 px-5 py-3 rounded-2xl font-bold">
+        Probar Audio
+      </button>
+
+      <button id="leaveBtn" class="bg-red-700 hover:bg-red-800 px-5 py-3 rounded-2xl font-bold">
+        Salir
+      </button>
+
+      <button id="startBtn" class="bg-green-500 hover:bg-green-600 px-5 py-3 rounded-2xl font-bold">
+        Encender Cámara
+      </button>
+
+      <button id="stopBtn" class="bg-red-500 hover:bg-red-600 px-5 py-3 rounded-2xl font-bold">
+        Apagar Cámara
+      </button>
+
+      <button id="screenBtn" class="bg-blue-500 hover:bg-blue-600 px-5 py-3 rounded-2xl font-bold">
+        Compartir Pantalla
+      </button>
+
+      <button id="micBtn" class="bg-yellow-400 hover:bg-yellow-500 text-black px-5 py-3 rounded-2xl font-bold">
+        Silenciar Mic
+      </button>
+
+      <button id="camBtn" class="bg-purple-500 hover:bg-purple-600 px-5 py-3 rounded-2xl font-bold">
+        Apagar Video
+      </button>
+
+    </div>
+
+    <div id="bottomPanels" class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+
+      <div class="bg-gray-700 rounded-2xl p-4 md:col-span-2">
+        <h2 class="text-2xl font-bold mb-4">Participantes</h2>
+
+        <div id="participantsList" class="space-y-3"></div>
+      </div>
+
+      <div class="bg-gray-700 rounded-2xl p-4">
+        <h2 class="text-2xl font-bold mb-4">Información</h2>
+
+        <div id="chatPanel" class="mt-4 bg-gray-800 rounded-2xl p-3 space-y-3">
+          <div id="chatMessages" class="h-40 overflow-y-auto space-y-2 text-sm"></div>
+
+          <div class="flex gap-2">
+            <input id="chatInput" type="text" placeholder="Escribe un mensaje" class="flex-1 bg-gray-700 rounded-xl p-2 outline-none">
+
+            <button id="sendChatBtn" class="bg-blue-500 px-4 rounded-xl">
+              Enviar
+            </button>
+          </div>
+        </div>
+
+        <div class="space-y-2 text-gray-300">
+          <p>ID: <span id="meetingIdText"></span></p>
+          <p>Contraseña: <span id="meetingPasswordText"></span></p>
+          <p id="meetingStatus">Esperando participantes...</p>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+<script type="module">
+
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js'
+import { getDatabase, ref, set, push, onValue, onChildAdded, update, remove } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js'
+
+const firebaseConfig = {
+  apiKey: 'AIzaSyD08BOeKwnB5sqJ4pOa7o-5DEUrYHQb85U',
+  authDomain: 'zoom-d3872.firebaseapp.com',
+  projectId: 'zoom-d3872',
+  storageBucket: 'zoom-d3872.firebasestorage.app',
+  messagingSenderId: '570388989231',
+  appId: '1:570388989231:web:81e67b41be5bfd57a74dda',
+  measurementId: 'G-TXNG55DT3N'
+}
+
+const app = initializeApp(firebaseConfig)
+const db = getDatabase(app)
+
+const joinScreen = document.getElementById('joinScreen')
+const meetingScreen = document.getElementById('meetingScreen')
+const createMeetingBtn = document.getElementById('createMeetingBtn')
+const joinMeetingBtn = document.getElementById('joinMeetingBtn')
+const usernameInput = document.getElementById('usernameInput')
+const meetingIdInput = document.getElementById('meetingIdInput')
+const meetingPasswordInput = document.getElementById('meetingPasswordInput')
+const participantsList = document.getElementById('participantsList')
+const meetingIdText = document.getElementById('meetingIdText')
+const meetingPasswordText = document.getElementById('meetingPasswordText')
+const previewBtn = document.getElementById('previewBtn')
+const previewScreen = document.getElementById('previewScreen')
+const previewVideo = document.getElementById('previewVideo')
+const joinNowBtn = document.getElementById('joinNowBtn')
+const cancelPreviewBtn = document.getElementById('cancelPreviewBtn')
+
+const video = document.getElementById('video')
+
+let currentMeetingId = null
+let currentUser = null
+const startBtn = document.getElementById('startBtn')
+const stopBtn = document.getElementById('stopBtn')
+const screenBtn = document.getElementById('screenBtn')
+const micBtn = document.getElementById('micBtn')
+const camBtn = document.getElementById('camBtn')
+const fullscreenBtn = document.getElementById('fullscreenBtn')
+const participantsBtn = document.getElementById('participantsBtn')
+const chatBtn = document.getElementById('chatBtn')
+const leaveBtn = document.getElementById('leaveBtn')
+const bottomPanels = document.getElementById('bottomPanels')
+const chatPanel = document.getElementById('chatPanel')
+const chatInput = document.getElementById('chatInput')
+const sendChatBtn = document.getElementById('sendChatBtn')
+const chatMessages = document.getElementById('chatMessages')
+const errorDiv = document.getElementById('error')
+const cameraText = document.getElementById('cameraText')
+const remoteVideos = document.getElementById('remoteVideos')
+const testAudioBtn = document.getElementById('testAudioBtn')
+const localAudio = document.getElementById('localAudio')
+
+let stream = null
+let screenStream = null
+let screenSharing = false
+let micOn = true
+let camOn = true
+let panelsVisible = true
+let pendingMeeting = null
+let isProcessing = false
+let isHost = false
+const myClientId = randomId()
+const peerConnections = {}
+let signalListenerStarted = false
+let clientListenerStarted = false
+
+function showError(msg) {
+  errorDiv.innerText = msg
+  errorDiv.classList.remove('hidden')
+}
+
+function hideError() {
+  errorDiv.classList.add('hidden')
+}
+
+async function startCamera() {
+  startBtn.innerText = 'Cargando...'
+
+  const localStream = await acquireMedia()
+  updateLocalPreview(localStream)
+
+  if (stream) {
+    const videoTrack = stream.getVideoTracks()[0]
+    const audioTrack = stream.getAudioTracks()[0]
+
+    if (videoTrack) {
+      const replacedVideo = replaceSenderTrack('video', videoTrack)
+      if (!replacedVideo) {
+        Object.keys(peerConnections).forEach(peerId => renegotiatePeer(peerId))
+      }
+    }
+    if (audioTrack) {
+      const replacedAudio = replaceSenderTrack('audio', audioTrack)
+      if (!replacedAudio) {
+        Object.keys(peerConnections).forEach(peerId => renegotiatePeer(peerId))
+      }
+    }
+  }
+
+  if (stream && stream.getVideoTracks().length) {
+    startBtn.innerText = 'Cámara Encendida'
+  } else {
+    startBtn.innerText = 'Encender Cámara'
+  }
+}
+
+function stopCamera() {
+
+  if (stream) {
+    stream.getTracks().forEach(track => track.stop())
+  }
+
+  if (screenStream) {
+    screenStream.getTracks().forEach(track => track.stop())
+  }
+
+  video.srcObject = null
+
+  cameraText.style.display = 'block'
+
+  startBtn.innerText = 'Encender Cámara'
+}
+
+async function shareScreen() {
+
+  try {
+    const newScreenStream = await navigator.mediaDevices.getDisplayMedia({
+      video: true,
+      audio: false
+    })
+
+    if (!newScreenStream) {
+      showError('No se pudo obtener la pantalla para compartir')
+      return
+    }
+
+    screenStream = newScreenStream
+    screenSharing = true
+    video.srcObject = screenStream
+
+    const screenTrack = screenStream.getVideoTracks()[0]
+    if (screenTrack) {
+      const replaced = replaceSenderTrack('video', screenTrack)
+      if (!replaced) {
+        console.warn('No se encontró sender de video, agregando track y negociando')
+        Object.keys(peerConnections).forEach(peerId => renegotiatePeer(peerId))
+      }
+      screenTrack.onended = () => {
+        stopScreenShare()
+      }
+    }
+
+  } catch (err) {
+    console.error(err)
+    showError('Error al compartir pantalla')
+  }
+}
+
+function toggleMic() {
+
+  if (!stream) return
+
+  micOn = !micOn
+
+  stream.getAudioTracks().forEach(track => {
+    track.enabled = micOn
+  })
+
+  micBtn.innerText = micOn
+    ? 'Silenciar Mic'
+    : 'Activar Mic'
+}
+
+function toggleCamera() {
+
+  if (!stream) return
+
+  camOn = !camOn
+
+  stream.getVideoTracks().forEach(track => {
+    track.enabled = camOn
+  })
+
+  camBtn.innerText = camOn
+    ? 'Apagar Video'
+    : 'Encender Video'
+}
+
+function randomId() {
+  return Math.floor(100000 + Math.random() * 900000).toString()
+}
+
+function replaceSenderTrack(kind, newTrack) {
+  let replaced = false
+
+  Object.values(peerConnections).forEach(pc => {
+    const sender = pc.getSenders().find(s => s.track && s.track.kind === kind)
+    if (sender && sender.replaceTrack) {
+      sender.replaceTrack(newTrack).catch(err => console.warn('replaceTrack error:', err))
+      replaced = true
+    } else if (newTrack) {
+      pc.addTrack(newTrack, new MediaStream([newTrack]))
+      replaced = true
+    }
+  })
+
+  return replaced
+}
+
+async function renegotiatePeer(peerId) {
+  const pc = peerConnections[peerId]
+  if (!pc || pc.signalingState !== 'stable') return
+
+  try {
+    const offer = await pc.createOffer()
+    await pc.setLocalDescription(offer)
+    await sendSignal(peerId, {
+      from: myClientId,
+      type: 'offer',
+      sdp: offer.sdp
+    })
+  } catch (err) {
+    console.warn('Error renegociando con peer', peerId, err)
+  }
+}
+
+function stopScreenShare() {
+  if (!screenSharing) return
+  screenSharing = false
+
+  if (screenStream) {
+    screenStream.getTracks().forEach(track => track.stop())
+    screenStream = null
+  }
+
+  if (stream) {
+    video.srcObject = stream
+    const cameraTrack = stream.getVideoTracks()[0]
+    if (cameraTrack) {
+      replaceSenderTrack('video', cameraTrack)
+    }
+    cameraText.style.display = stream.getVideoTracks().length ? 'none' : 'block'
+  }
+}
+
+async function listVideoInputs() {
+  try {
+    const devices = await navigator.mediaDevices.enumerateDevices()
+    return devices.filter(device => device.kind === 'videoinput')
+  } catch (err) {
+    console.warn('No se pudieron listar dispositivos de video:', err)
+    return []
+  }
+}
+
+async function acquireMedia() {
+  hideError()
+
+  const defaultConstraints = {
+    audio: {
+      echoCancellation: true,
+      noiseSuppression: true
+    },
+    video: true
+  }
+
+  try {
+    return await navigator.mediaDevices.getUserMedia(defaultConstraints)
+  } catch (err) {
+    console.warn('getUserMedia fallo con video+audio:', err)
+  }
+
+  const cameras = await listVideoInputs()
+  for (const camera of cameras) {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true
+        },
+        video: {
+          deviceId: { exact: camera.deviceId }
+        }
+      })
+      console.log('Cámara disponible seleccionada:', camera.label || camera.deviceId)
+      return stream
+    } catch (err) {
+      console.warn('Fallo con cámara:', camera.label || camera.deviceId, err)
+    }
+  }
+
+  const audioStream = await navigator.mediaDevices.getUserMedia({
+    audio: {
+      echoCancellation: true,
+      noiseSuppression: true
+    }
+  }).catch(err => {
+    console.warn('getUserMedia solo audio fallo:', err)
+    return null
+  })
+
+  if (audioStream) {
+    return audioStream
+  }
+
+  const videoStream = await navigator.mediaDevices.getUserMedia({
+    video: true
+  }).catch(err => {
+    console.warn('getUserMedia solo video fallo:', err)
+    return null
+  })
+
+  return videoStream
+}
+
+function speakAudio(text) {
+  if ('speechSynthesis' in window) {
+    const utterance = new SpeechSynthesisUtterance(text)
+    utterance.lang = 'es-ES'
+    window.speechSynthesis.cancel()
+    window.speechSynthesis.speak(utterance)
+    return
+  }
+
+  const audio = new Audio('data:audio/wav;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU2LjQxLjEwMQAAAAAAAAAAAAAA//tQxAADB0AAAAAAAkAAABhAAAAAAABAAACAAACAAABBAAAAAAAAAAAAAAAAAAAAAAA//uQZAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==')
+  audio.play().catch(() => {})
+}
+
+function playJoinNotification() {
+  speakAudio('Bienvenido a la reunión')
+}
+
+function updateLocalPreview(streamObject) {
+  stream = streamObject
+
+  if (stream) {
+    video.srcObject = stream
+
+    if (stream.getVideoTracks().length) {
+      cameraText.style.display = 'none'
+    } else {
+      cameraText.style.display = 'block'
+      cameraText.innerText = 'Cámara no disponible'
+    }
+
+    if (stream.getAudioTracks().length) {
+      stream.getAudioTracks().forEach(track => {
+        track.enabled = true
+      })
+      micOn = true
+    }
+  } else {
+    video.srcObject = null
+    cameraText.style.display = 'block'
+    cameraText.innerText = 'Cámara/Mic no disponibles'
+  }
+}
+
+function addRemoteVideo(peerId, name, remoteStream) {
+  let existing = document.getElementById('remoteVideo-' + peerId)
+
+  if (!existing) {
+    const wrapper = document.createElement('div')
+    wrapper.id = 'remoteWrapper-' + peerId
+    wrapper.className = 'bg-black rounded-2xl border border-gray-700 overflow-hidden'
+
+    const label = document.createElement('div')
+    label.className = 'px-3 py-2 text-sm text-white bg-gray-800'
+    label.textContent = name || 'Participante'
+
+    const videoEl = document.createElement('video')
+    videoEl.id = 'remoteVideo-' + peerId
+    videoEl.autoplay = true
+    videoEl.playsInline = true
+    videoEl.muted = false
+    videoEl.className = 'w-full h-48 object-cover'
+
+    wrapper.appendChild(label)
+    wrapper.appendChild(videoEl)
+    remoteVideos.appendChild(wrapper)
+    existing = videoEl
+  }
+
+  existing.srcObject = remoteStream
+}
+
+function removeRemoteVideo(peerId) {
+  const wrapper = document.getElementById('remoteWrapper-' + peerId)
+  if (wrapper) wrapper.remove()
+}
+
+function closePeerConnection(peerId) {
+  const pc = peerConnections[peerId]
+  if (pc) {
+    pc.close()
+    delete peerConnections[peerId]
+  }
+  removeRemoteVideo(peerId)
+}
+
+function createPeerConnection(peerId, peerName) {
+  if (peerConnections[peerId]) return peerConnections[peerId]
+
+  const pc = new RTCPeerConnection({
+    iceServers: [
+      { urls: 'stun:stun.l.google.com:19302' }
+    ]
+  })
+
+  peerConnections[peerId] = pc
+
+  if (stream) {
+    stream.getTracks().forEach(track => pc.addTrack(track, stream))
+  }
+
+  pc.ontrack = event => {
+    const remoteStream = (event.streams && event.streams[0])
+      ? event.streams[0]
+      : new MediaStream()
+
+    if (event.track && !(event.streams && event.streams[0])) {
+      remoteStream.addTrack(event.track)
+    }
+
+    addRemoteVideo(peerId, peerName, remoteStream)
+  }
+
+  pc.onicecandidate = event => {
+    if (event.candidate) {
+      sendSignal(peerId, {
+        from: myClientId,
+        type: 'candidate',
+        candidate: event.candidate
+      })
+    }
+  }
+
+  pc.onconnectionstatechange = () => {
+    if (pc.connectionState === 'failed' || pc.connectionState === 'disconnected' || pc.connectionState === 'closed') {
+      closePeerConnection(peerId)
+    }
+  }
+
+  return pc
+}
+
+async function createOffer(peerId, peerName) {
+  const pc = createPeerConnection(peerId, peerName)
+  const offer = await pc.createOffer()
+  await pc.setLocalDescription(offer)
+
+  await sendSignal(peerId, {
+    from: myClientId,
+    type: 'offer',
+    sdp: offer.sdp
+  })
+}
+
+async function createAnswer(peerId, peerName, offerSdp) {
+  const pc = createPeerConnection(peerId, peerName)
+  await pc.setRemoteDescription({ type: 'offer', sdp: offerSdp })
+
+  const answer = await pc.createAnswer()
+  await pc.setLocalDescription(answer)
+
+  await sendSignal(peerId, {
+    from: myClientId,
+    type: 'answer',
+    sdp: answer.sdp
+  })
+}
+
+async function sendSignal(targetId, message) {
+  await push(ref(db, 'meetings/' + currentMeetingId + '/signals/' + targetId), message)
+}
+
+async function handleSignal(message) {
+  if (!message || message.from === myClientId) return
+
+  const { from, type, sdp, candidate } = message
+  const clientName = ''
+
+  if (type === 'offer') {
+    await createAnswer(from, clientName, sdp)
+    return
+  }
+
+  const pc = createPeerConnection(from, clientName)
+
+  if (type === 'answer') {
+    await pc.setRemoteDescription({ type: 'answer', sdp })
+    return
+  }
+
+  if (type === 'candidate' && candidate) {
+    try {
+      await pc.addIceCandidate(candidate)
+    } catch (err) {
+      console.warn('No se pudo añadir ICE candidate', err)
+    }
+  }
+}
+
+function startSignalListener() {
+  if (signalListenerStarted) return
+  signalListenerStarted = true
+
+  const signalsRef = ref(db, 'meetings/' + currentMeetingId + '/signals/' + myClientId)
+
+  onChildAdded(signalsRef, async snapshot => {
+    const message = snapshot.val()
+    await handleSignal(message)
+    await remove(snapshot.ref)
+  })
+}
+
+function listenForClients() {
+  if (clientListenerStarted) return
+  clientListenerStarted = true
+
+  const clientsRef = ref(db, 'meetings/' + currentMeetingId + '/clients')
+
+  onValue(clientsRef, snapshot => {
+    const clients = snapshot.val()
+    if (!clients) return
+
+    Object.entries(clients).forEach(([clientId, client]) => {
+      if (clientId === myClientId) return
+      if (peerConnections[clientId]) return
+      if (isHost) {
+        createOffer(clientId, client.name)
+      }
+    })
+  })
+}
+
+async function registerClientToMeeting() {
+  if (!currentMeetingId) return
+  await set(ref(db, 'meetings/' + currentMeetingId + '/clients/' + myClientId), {
+    name: currentUser,
+    isHost,
+    joinedAt: Date.now()
+  })
+}
+
+createMeetingBtn.addEventListener('click', async () => {
+
+  const username = usernameInput.value.trim()
+
+  if (!username) {
+    showError('Escribe tu nombre')
+    return
+  }
+
+  isHost = true
+
+  const meetingId = randomId()
+  const password = randomId().slice(0, 4)
+
+  currentMeetingId = meetingId
+  currentUser = username
+
+  pendingMeeting = {
+    meetingId,
+    password,
+    host: username
+  }
+
+  hideError()
+  cameraText.innerText = 'Cámara apagada'
+
+  joinScreen.classList.add('hidden')
+  joinScreen.style.display = 'none'
+  
+  previewScreen.classList.remove('hidden')
+  previewScreen.style.display = 'block'
+
+  const localStream = await acquireMedia()
+  updateLocalPreview(localStream)
+  previewVideo.srcObject = stream
+})
+
+joinNowBtn.addEventListener('click', async () => {
+  console.log('Botón Entrar Reunión - Click detectado')
+
+  if (isProcessing) {
+    console.log('Ya se está procesando una reunión, ignorando click')
+    return
+  }
+
+  if (!pendingMeeting) {
+    console.error('No hay reunión preparada')
+    showError('No hay reunión preparada')
+    return
+  }
+
+  isProcessing = true
+  joinNowBtn.disabled = true
+  joinNowBtn.innerText = 'Procesando...'
+
+  console.log('pendingMeeting:', pendingMeeting)
+
+  try {
+    if (pendingMeeting.isJoining) {
+      console.log('Modo: Uniéndose a reunión')
+
+      const { meetingId, password, participantKey } = pendingMeeting
+
+      joinNowBtn.innerText = 'Esperando admisión...'
+
+      onValue(ref(db, 'meetings/' + meetingId + '/participants/' + participantKey), async snapshot => {
+
+        const data = snapshot.val()
+
+        if (data && data.admitted === true) {
+          await registerClientToMeeting()
+
+          previewScreen.style.display = 'none'
+          previewScreen.classList.add('hidden')
+
+          meetingScreen.style.display = 'block'
+          meetingScreen.classList.remove('hidden')
+
+          openMeeting(meetingId, password)
+
+          if (stream) {
+            video.srcObject = stream
+            cameraText.style.display = 'none'
+          }
+
+          joinNowBtn.disabled = false
+          joinNowBtn.innerText = 'Entrar a la reunión'
+          isProcessing = false
+        }
+      })
+
+      return
+    }
+
+    console.log('Modo: Creando nueva reunión')
+
+    const { meetingId, password, host } = pendingMeeting
+
+    console.log('Creando reunión en Firebase con ID:', meetingId)
+
+    try {
+      await set(ref(db, 'meetings/' + meetingId), {
+        password,
+        host,
+        sharingScreen: false,
+        createdAt: Date.now()
+      })
+      console.log('✓ Reunión creada en Firebase')
+    } catch (err) {
+      console.error('✗ Error al crear reunión:', err)
+      showError('Error al crear reunión: ' + err.message)
+      throw err
+    }
+
+    try {
+      console.log('Agregando participante (host)...')
+      await push(ref(db, 'meetings/' + meetingId + '/participants'), {
+        name: host,
+        admitted: true,
+        isHost: true
+      })
+      console.log('✓ Host agregado')
+    } catch (err) {
+      console.error('✗ Error al agregar participante:', err)
+      showError('Error al agregar participante: ' + err.message)
+      throw err
+    }
+
+    console.log('Host agregado, abriendo reunión...')
+
+    previewScreen.style.display = 'none'
+    previewScreen.classList.add('hidden')
+    
+    meetingScreen.style.display = 'block'
+    meetingScreen.classList.remove('hidden')
+
+    openMeeting(meetingId, password)
+
+    if (stream) {
+      video.srcObject = stream
+      cameraText.style.display = 'none'
+      startBtn.innerText = 'Cámara Encendida'
+    } else {
+      cameraText.innerText = 'Cámara no disponible'
+    }
+
+    console.log('✓ Reunión abierta exitosamente')
+    isProcessing = false
+    joinNowBtn.disabled = false
+    joinNowBtn.innerText = 'Entrar a la reunión'
+
+  } catch (err) {
+    console.error('❌ Error capturado:', err)
+    console.error('Error code:', err.code)
+    console.error('Error message:', err.message)
+    
+    let mensajeError = 'Error: ' + err.message
+    
+    if (err.code === 'PERMISSION_DENIED') {
+      mensajeError = 'Permiso denegado. Revisa las reglas de Firebase'
+    }
+    
+    showError(mensajeError)
+    isProcessing = false
+    joinNowBtn.disabled = false
+    joinNowBtn.innerText = 'Entrar a la reunión'
+  }
+})
+
+cancelPreviewBtn.addEventListener('click', () => {
+
+  previewScreen.classList.add('hidden')
+  previewScreen.style.display = 'none'
+  
+  joinScreen.classList.remove('hidden')
+  joinScreen.style.display = 'block'
+
+  if (stream) {
+    stream.getTracks().forEach(track => track.stop())
+  }
+
+  previewVideo.srcObject = null
+  isProcessing = false
+  joinNowBtn.disabled = false
+  joinNowBtn.innerText = 'Entrar a la reunión'
+})
+
+joinMeetingBtn.addEventListener('click', async () => {
+
+  const username = usernameInput.value.trim()
+  const meetingId = meetingIdInput.value.trim()
+  const password = meetingPasswordInput.value.trim()
+
+  if (!username || !meetingId || !password) {
+    showError('Completa todos los datos')
+    return
+  }
+
+  isHost = false
+  currentMeetingId = meetingId
+  currentUser = username
+
+  try {
+
+    const participantRef = await push(ref(db, 'meetings/' + meetingId + '/participants'), {
+      name: username,
+      admitted: false,
+      isHost: false
+    })
+
+    pendingMeeting = {
+      meetingId,
+      password,
+      participantKey: participantRef.key,
+      isJoining: true
+    }
+
+    hideError()
+    cameraText.innerText = 'Cámara apagada'
+
+    joinScreen.classList.add('hidden')
+    joinScreen.style.display = 'none'
+    
+    previewScreen.classList.remove('hidden')
+    previewScreen.style.display = 'block'
+
+    const localStream = await acquireMedia()
+    updateLocalPreview(localStream)
+    previewVideo.srcObject = stream
+
+  } catch (err) {
+    console.error(err)
+    showError('No se pudo unir a la reunión')
+  }
+})
+
+function openMeeting(meetingId, password) {
+
+  hideError()
+
+  console.log('Abriendo reunión:', meetingId)
+
+  previewScreen.classList.add('hidden')
+  previewScreen.style.display = 'none'
+
+  joinScreen.classList.add('hidden')
+  joinScreen.style.display = 'none'
+  
+  console.log('Mostrando meetingScreen...')
+  meetingScreen.classList.remove('hidden')
+  meetingScreen.style.display = 'block'
+  console.log('meetingScreen visible:', meetingScreen.style.display)
+
+  if (currentUser) {
+    document.title = 'Reunión - ' + currentUser
+  }
+
+  if (meetingIdText) {
+    meetingIdText.innerText = meetingId
+    console.log('ID de reunión mostrado:', meetingId)
+  }
+  if (meetingPasswordText) {
+    meetingPasswordText.innerText = password
+    console.log('Contraseña mostrada')
+  }
+
+    playJoinNotification()
+  try {
+    onValue(ref(db, 'meetings/' + meetingId + '/chat'), snapshot => {
+
+      chatMessages.innerHTML = ''
+
+      const data = snapshot.val()
+
+      if (!data) return
+
+      Object.values(data).forEach(message => {
+
+        const div = document.createElement('div')
+
+        div.className = 'bg-gray-700 rounded-xl p-2'
+
+        div.innerHTML = `<strong>${message.user}:</strong> ${message.text}`
+
+        chatMessages.appendChild(div)
+      })
+
+      chatMessages.scrollTop = chatMessages.scrollHeight
+    })
+
+    onValue(ref(db, 'meetings/' + meetingId + '/participants'), snapshot => {
+
+      participantsList.innerHTML = ''
+
+      const data = snapshot.val()
+
+      if (!data) return
+
+      Object.entries(data).forEach(([key, participant]) => {
+
+        const div = document.createElement('div')
+
+        div.className = 'bg-gray-600 rounded-xl p-3 flex justify-between items-center'
+
+        div.innerHTML = `
+          <span>${participant.name}</span>
+          ${participant.admitted
+            ? '<span class="text-green-400 font-bold">Dentro</span>'
+            : `<button class="bg-green-500 px-4 py-2 rounded-xl" onclick="admitParticipant('${key}')">Admitir</button>`}
+        `
+
+        participantsList.appendChild(div)
+      })
+    })
+  } catch (err) {
+    console.error('Error en loadParticipants:', err)
+    showError('Error al cargar participantes')
+  }
+}
+
+window.admitParticipant = async function(key) {
+  await update(ref(db, 'meetings/' + currentMeetingId + '/participants/' + key), {
+    admitted: true
+  })
+}
+
+startBtn.addEventListener('click', startCamera)
+stopBtn.addEventListener('click', stopCamera)
+screenBtn.addEventListener('click', shareScreen)
+micBtn.addEventListener('click', toggleMic)
+camBtn.addEventListener('click', toggleCamera)
+
+fullscreenBtn.addEventListener('click', async () => {
+
+  if (!document.fullscreenElement) {
+    await meetingScreen.requestFullscreen()
+    fullscreenBtn.innerText = 'Salir Pantalla Completa'
+  } else {
+    await document.exitFullscreen()
+    fullscreenBtn.innerText = 'Pantalla Completa'
+  }
+})
+
+participantsBtn.addEventListener('click', () => {
+
+  panelsVisible = !panelsVisible
+
+  bottomPanels.style.display = panelsVisible
+    ? 'grid'
+    : 'none'
+})
+
+chatBtn.addEventListener('click', () => {
+
+  if (chatPanel.style.display === 'none') {
+    chatPanel.style.display = 'block'
+  } else {
+    chatPanel.style.display = 'none'
+  }
+})
+
+leaveBtn.addEventListener('click', async () => {
+
+  stopCamera()
+
+  Object.keys(peerConnections).forEach(closePeerConnection)
+  remoteVideos.innerHTML = ''
+
+  meetingScreen.classList.add('hidden')
+  joinScreen.classList.remove('hidden')
+
+  if (currentMeetingId && myClientId) {
+    await remove(ref(db, 'meetings/' + currentMeetingId + '/clients/' + myClientId)).catch(() => {})
+  }
+
+  signalListenerStarted = false
+  clientListenerStarted = false
+})
+
+sendChatBtn.addEventListener('click', async () => {
+
+  const text = chatInput.value.trim()
+
+  if (!text) return
+
+  await push(ref(db, 'meetings/' + currentMeetingId + '/chat'), {
+    user: currentUser,
+    text
+  })
+
+  chatInput.value = ''
+})
+
+testAudioBtn.addEventListener('click', () => {
+  if (!stream || !stream.getAudioTracks().length) {
+    showError('Permite el micrófono y enciende la cámara antes de probar el audio')
+    return
+  }
+
+  const micTrack = stream.getAudioTracks()[0]
+  if (!micTrack) {
+    showError('No hay pista de micrófono activa')
+    return
+  }
+
+  localAudio.srcObject = new MediaStream([micTrack])
+  localAudio.muted = false
+  showError('Reproduciendo tu micrófono local. Si no escuchas, revisa permisos y auriculares.')
+})
+
+</script>
+
+</body>
+</html>
